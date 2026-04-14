@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerMind — AI Career Recommendation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="/static/theme.js"></script>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">CareerMind</span>
+      </div>
+      <nav>
+        <a href="/" class="nav-link active">Explore</a>
+        <a href="/about" class="nav-link">About</a>
+        <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="icon-dark">☾</span><span class="icon-light">☀</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Expert System · Knowledge-Based AI</p>
+      <h1 class="hero-title">Discover your<br/><em>ideal career path</em></h1>
+      <p class="hero-sub">
+        Answer a few questions about yourself. Our rule-based AI reasons over
+        33 expert rules to surface the careers best aligned with your profile —
+        with full, transparent explanations.
+      </p>
+    </div>
+    <div class="hero-badge">
+      <span>33 Rules</span>
+      <span>|</span>
+      <span>Forward Chaining</span>
+      <span>|</span>
+      <span>Explainable AI</span>
+    </div>
+  </section>
+
+  <!-- ── Form ───────────────────────────────────────────────────────────── -->
+  <main class="form-wrapper">
+    <form action="/" method="POST" id="profileForm">
+
+      <!-- ── Step 1: Interests ─────────────────────────────────────────── -->
+      <section class="form-section" id="step-interests">
+        <div class="section-header">
+          <span class="step-num">01</span>
+          <div>
+            <h2 class="section-title">What excites you?</h2>
+            <p class="section-hint">Select all areas that genuinely interest you.</p>
+          </div>
+        </div>
+
+        <div class="chips-grid">
+          {% for key, label in interests %}
+          <label class="chip">
+            <input type="checkbox" name="interests" value="{{ key }}" />
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ── Step 2: Skills ────────────────────────────────────────────── -->
+      <section class="form-section" id="step-skills">
+        <div class="section-header">
+          <span class="step-num">02</span>
+          <div>
+            <h2 class="section-title">What are your strengths?</h2>
+            <p class="section-hint">Choose the skills you feel confident about.</p>
+          </div>
+        </div>
+
+        <div class="chips-grid">
+          {% for key, label in skills %}
+          <label class="chip chip--skill">
+            <input type="checkbox" name="skills" value="{{ key }}" />
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ── Step 3: Academic ──────────────────────────────────────────── -->
+      <section class="form-section" id="step-academic">
+        <div class="section-header">
+          <span class="step-num">03</span>
+          <div>
+            <h2 class="section-title"><strong>Academic performance</strong></h2>
+            <p class="section-hint">
+              <strong>Subjects shown below adapt to the interests you selected above.</strong>
+              Rate each one from 0–100%.
+            </p>
+          </div>
+        </div>
+
+        <p id="subjects-empty" class="section-hint" style="margin-top:0.5rem">
+          <strong>Select at least one interest above to reveal subject-wise sliders.</strong>
+        </p>
+        <div class="score-grid" id="dynamic-subjects"></div>
+      </section>
+
+      <!-- ── Submit ────────────────────────────────────────────────────── -->
+      <div class="submit-row">
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="btn-text">Analyse my profile</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <p class="submit-note">The expert system will reason over your inputs using 33 IF-THEN rules.</p>
+      </div>
+
+    </form>
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p>CareerMind · Rule-Based Expert System · Built with Python &amp; Flask</p>
+  </footer>
+
+  <script>
+    // Sync range sliders with displayed values
+    function syncVal(input, outputId) {
+      document.getElementById(outputId).textContent = input.value + '%';
+    }
+
+    // ── Interest → Subjects mapping ──────────────────────────────────────
+    // Each subject has a category used server-side to derive math/science scores.
+    // Categories: "math", "science", "other".  Add new interests by appending
+    // an entry here — the UI will pick them up automatically.
+    const SUBJECT_MAP = {
+      interest_coding:                 ['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
+      interest_artificial_intelligence:['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
+      interest_web_development:        ['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
+      interest_gaming:                 ['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
+      interest_data_analysis:          ['Statistics','Mathematics','Economics','Data Interpretation'],
+      interest_finance:                ['Statistics','Mathematics','Economics','Data Interpretation'],
+      interest_business:               ['Statistics','Mathematics','Economics','Data Interpretation'],
+      interest_cybersecurity:          ['Cryptography','Network Security','Operating Systems'],
+      interest_engineering:            ['Physics','Mathematics','Circuits','Electronics'],
+      interest_electronics:            ['Physics','Mathematics','Circuits','Electronics'],
+      interest_biology:                ['Biology','Chemistry','Human Anatomy'],
+      interest_medicine:               ['Biology','Chemistry','Human Anatomy'],
+      interest_science:                ['Physics','Chemistry','Mathematics'],
+      interest_psychology:             ['Psychology','Biology'],
+      interest_law:                    ['Political Science','Legal Studies'],
+      interest_design:                 ['Design','Creativity','Communication'],
+      interest_marketing:              ['Design','Creativity','Communication'],
+      interest_writing:                ['English','Communication','Writing Skills'],
+      interest_education:              ['Mathematics','Science','English','Pedagogy'],
+      interest_environment:            ['Environmental Science','Biology','Geography'],
+    };
+
+    // Subject → category (kept in sync with server-side categorisation)
+    const SUBJECT_CATEGORY = {
+      'Mathematics':'math','Statistics':'math','Algorithms':'math','Data Structures':'math',
+      'Data Interpretation':'math','Economics':'math','Cryptography':'math',
+      'Physics':'science','Chemistry':'science','Biology':'science','Human Anatomy':'science',
+      'Environmental Science':'science','Electronics':'science','Circuits':'science',
+      'Geography':'science','Network Security':'science','DBMS':'science',
+      'Operating Systems':'science','Computer Networks':'science','Science':'science',
+    };
+
+    const SUBJECT_ICON = { math:'∑', science:'⚗', other:'✎' };
+    const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+
+    function renderSubjects() {
+      const selected = Array.from(
+        document.querySelectorAll('input[name="interests"]:checked')
+      ).map(cb => cb.value);
+
+      // Union of all subjects, de-duplicated, stable order of first appearance
+      const seen = new Set();
+      const subjects = [];
+      selected.forEach(key => {
+        (SUBJECT_MAP[key] || []).forEach(subj => {
+          if (!seen.has(subj)) { seen.add(subj); subjects.push(subj); }
+        });
+      });
+
+      const container = document.getElementById('dynamic-subjects');
+      const empty = document.getElementById('subjects-empty');
+      container.innerHTML = '';
+
+      if (subjects.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      subjects.forEach(subject => {
+        const cat = SUBJECT_CATEGORY[subject] || 'other';
+        const icon = SUBJECT_ICON[cat];
+        const id = 'subj_' + slug(subject);
+        const outId = id + '_val';
+        const card = document.createElement('div');
+        card.className = 'score-card';
+        card.innerHTML = `
+          <label for="${id}">
+            <span class="score-icon">${icon}</span>
+            <span><strong>${subject}</strong></span>
+          </label>
+          <div class="range-wrap">
+            <input type="range" id="${id}" name="subject:${cat}:${subject}"
+                   min="0" max="100" value="60"
+                   oninput="syncVal(this,'${outId}')" />
+            <output id="${outId}" class="range-output">60%</output>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    // Highlight selected chips + re-render subjects when interests change
+    document.querySelectorAll('.chip input').forEach(cb => {
+      cb.addEventListener('change', () => {
+        cb.closest('.chip').classList.toggle('chip--selected', cb.checked);
+        if (cb.name === 'interests') renderSubjects();
+      });
+    });
+
+    // Initial render (handles page reload with no selections)
+    renderSubjects();
+
+    // Loading state on submit
+    document.getElementById('profileForm').addEventListener('submit', () => {
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.querySelector('.btn-text').textContent = 'Reasoning…';
+    });
+  </script>
+
+</body>
+</html>

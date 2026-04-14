@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Results — CareerMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="/static/theme.js"></script>
+</head>
+<body class="results-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">CareerMind</span>
+      </div>
+      <nav>
+        <a href="/" class="nav-link">← New Analysis</a>
+        <a href="/about" class="nav-link">About</a>
+        <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="icon-dark">☾</span><span class="icon-light">☀</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="results-wrapper">
+
+    <!-- ── No results ───────────────────────────────────────────────────── -->
+    {% if not result.recommendations %}
+    <div class="no-results">
+      <div class="no-results-icon">⚠</div>
+      <h2>No matches found</h2>
+      <p>The inference engine could not find matching rules for your inputs.
+         Please go back and select more interests and skills.</p>
+      <a href="/" class="btn-submit" style="display:inline-flex;margin-top:1.5rem;">
+        <span class="btn-text">Try again</span>
+        <span class="btn-arrow">→</span>
+      </a>
+    </div>
+
+    {% else %}
+
+    <!-- ── Top Banner ───────────────────────────────────────────────────── -->
+    <div class="results-banner">
+      <div class="banner-left">
+        <p class="banner-eyebrow">Top Recommendation</p>
+        <h1 class="banner-career">{{ result.top_career.career }}</h1>
+        <div class="banner-meta">
+          <span class="tag tag--green">{{ result.top_career.rules_count }} rule{{ 's' if result.top_career.rules_count != 1 }} fired</span>
+          <span class="tag tag--blue">{{ result.total_rules_fired }} total activations</span>
+          <span class="tag tag--purple">{{ result.recommendations|length }} careers matched</span>
+        </div>
+      </div>
+      <div class="banner-right">
+        <div class="confidence-ring">
+          <svg viewBox="0 0 120 120" class="ring-svg">
+            <circle cx="60" cy="60" r="50" class="ring-bg"/>
+            <circle cx="60" cy="60" r="50" class="ring-fill"
+              style="--pct: {{ result.top_career.confidence }}"/>
+          </svg>
+          <div class="ring-label">
+            <span class="ring-pct">{{ '%g' % result.top_career.confidence }}%</span>
+            <span class="ring-sub">confidence</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Explanation Card ──────────────────────────────────────────────── -->
+    <section class="explain-card">
+      <h3 class="explain-title">
+        <span class="explain-icon">🔍</span> Why <em>{{ result.top_career.career }}</em>?
+      </h3>
+      <p class="explain-intro">
+        The inference engine matched <strong>{{ result.top_career.rules_count }} rule(s)</strong>
+        ({{ result.top_career.rules_fired | join(', ') }}) from the knowledge base.
+        Here is the reasoning chain:
+      </p>
+      <ul class="reason-list">
+        {% for reason in result.top_career.explanations %}
+        <li class="reason-item">
+          <span class="reason-dot"></span>
+          {{ reason }}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <!-- ── Profile Used ──────────────────────────────────────────────────── -->
+    <section class="profile-used">
+      <h3 class="profile-title">Your Input Profile</h3>
+      <div class="profile-grid">
+        <div class="profile-block">
+          <span class="profile-label">Interests</span>
+          <div class="profile-tags">
+            {% for i in user_profile.interests %}
+            <span class="ptag ptag--interest">{{ i }}</span>
+            {% else %}
+            <span class="ptag">None selected</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="profile-block">
+          <span class="profile-label">Skills</span>
+          <div class="profile-tags">
+            {% for s in user_profile.skills %}
+            <span class="ptag ptag--skill">{{ s }}</span>
+            {% else %}
+            <span class="ptag">None selected</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="profile-block">
+          <span class="profile-label">Academic Scores</span>
+          <div class="score-badges">
+            <div class="sbadge">
+              <span class="sbadge-label">Math</span>
+              <span class="sbadge-val">{{ user_profile.math_score }}%</span>
+            </div>
+            <div class="sbadge">
+              <span class="sbadge-label">Science</span>
+              <span class="sbadge-val">{{ user_profile.science_score }}%</span>
+            </div>
+            <div class="sbadge">
+              <span class="sbadge-label">Overall</span>
+              <span class="sbadge-val">{{ user_profile.overall_score }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Top 5 Ranked Careers ──────────────────────────────────────────── -->
+    <section class="ranked-section">
+      <h3 class="ranked-title">All Matched Careers</h3>
+      <p class="ranked-sub">Ranked by inference engine score (highest first)</p>
+
+      <div class="ranked-list">
+        {% for rec in top_n %}
+        <div class="ranked-card {% if loop.index == 1 %}ranked-card--top{% endif %}">
+          <div class="rank-num">#{{ loop.index }}</div>
+          <div class="rank-body">
+            <div class="rank-header">
+              <h4 class="rank-career">{{ rec.career }}</h4>
+              <div class="rank-badges">
+                <span class="tag tag--score">Score: {{ rec.score }}</span>
+                <span class="tag tag--conf">{{ '%g' % rec.confidence }}%</span>
+              </div>
+            </div>
+            <!-- Confidence bar -->
+            <div class="conf-bar-wrap">
+              <div class="conf-bar" style="width: {{ rec.confidence }}%"></div>
+            </div>
+            <!-- Rules fired -->
+            <div class="rule-pills">
+              {% for r in rec.rules_fired %}
+              <span class="rule-pill">{{ r }}</span>
+              {% endfor %}
+            </div>
+            <!-- Collapsible reasoning -->
+            <details class="rank-details">
+              <summary>View reasoning ({{ rec.explanations|length }} points)</summary>
+              <ul class="mini-reason-list">
+                {% for point in rec.explanations %}
+                <li>{{ point }}</li>
+                {% endfor %}
+              </ul>
+            </details>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ── Working Memory (transparency) ────────────────────────────────── -->
+    <section class="wm-section">
+      <h3 class="wm-title">Working Memory (Active Facts)</h3>
+      <p class="wm-sub">These are the facts asserted into the inference engine from your inputs.</p>
+      <div class="wm-facts">
+        {% for fact in result.working_memory %}
+        <span class="fact-chip">{{ fact }}</span>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ── CTA ───────────────────────────────────────────────────────────── -->
+    <div class="cta-row">
+      <a href="/" class="btn-submit">
+        <span class="btn-text">Try a different profile</span>
+        <span class="btn-arrow">→</span>
+      </a>
+    </div>
+
+    {% endif %}
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CareerMind · Rule-Based Expert System · Built with Python &amp; Flask</p>
+  </footer>
+
+  <script>
+    // Animate confidence bars on load
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.conf-bar').forEach((bar, i) => {
+        bar.style.transition = `width 0.6s ease ${i * 0.1}s`;
+      });
+    });
+  </script>
+
+</body>
+</html>

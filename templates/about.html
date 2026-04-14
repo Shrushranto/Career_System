@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — CareerMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="/static/theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">CareerMind</span>
+      </div>
+      <nav>
+        <a href="/" class="nav-link">← Back</a>
+        <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="icon-dark">☾</span><span class="icon-light">☀</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="about-wrapper">
+    <h1 class="about-title">How CareerMind Works</h1>
+    <p class="about-intro">
+      CareerMind is a <strong>symbolic AI / expert system</strong> built with Python and Flask.
+      It uses a hand-crafted knowledge base of <strong>{{ rule_count }} IF-THEN rules</strong>
+      and a forward-chaining inference engine to reason about career suitability.
+    </p>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-card-icon">📥</div>
+        <h3>1. User Input</h3>
+        <p>The user selects interests, skills, and enters academic scores via the form.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🧠</div>
+        <h3>2. Working Memory</h3>
+        <p>Inputs are converted into boolean facts and loaded into working memory. Academic thresholds (≥65%) trigger additional derived facts.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">⚙️</div>
+        <h3>3. Forward Chaining</h3>
+        <p>The inference engine scans all rules. A rule fires if ALL its conditions are present in working memory (AND logic).</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">📊</div>
+        <h3>4. Scoring</h3>
+        <p>Each fired rule adds its weight to the career's score. Multiple rules for the same career accumulate — this is the neuro-symbolic component.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🔍</div>
+        <h3>5. Explanation</h3>
+        <p>Every recommendation includes the rule IDs that fired and human-readable explanation bullets — full transparency, no black box.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🏆</div>
+        <h3>6. Ranking</h3>
+        <p>Careers are ranked by accumulated score. A relative confidence percentage shows how strongly each career was supported.</p>
+      </div>
+    </div>
+
+    <div class="about-tech">
+      <h2>Technology Stack</h2>
+      <ul>
+        <li><strong>Language:</strong> Python 3.x</li>
+        <li><strong>Web Framework:</strong> Flask</li>
+        <li><strong>AI Technique:</strong> Rule-Based Expert System with Forward Chaining</li>
+        <li><strong>Knowledge Base:</strong> {{ rule_count }} hand-crafted IF-THEN rules across 20+ career domains</li>
+        <li><strong>Scoring:</strong> Weighted rule accumulation (neuro-symbolic layer)</li>
+        <li><strong>UI:</strong> Pure HTML/CSS with no external JS frameworks</li>
+      </ul>
+    </div>
+
+    <div class="cta-row">
+      <a href="/" class="btn-submit">
+        <span class="btn-text">Try it now</span>
+        <span class="btn-arrow">→</span>
+      </a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>CareerMind · Rule-Based Expert System · Built with Python &amp; Flask</p>
+  </footer>
+</body>
+</html>
