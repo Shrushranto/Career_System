@@ -11,12 +11,14 @@ Run with:  python app.py
 Then open: http://127.0.0.1:5000
 """
 
+import os
+
 from flask import Flask, render_template, request, jsonify
 from inference import get_recommendations
 from rules import INTEREST_OPTIONS, SKILL_OPTIONS
 
 app = Flask(__name__)
-app.secret_key = "career_expert_system_2024"
+app.secret_key = os.environ.get("SECRET_KEY", "career_expert_system_dev_only")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,7 +101,8 @@ def index():
         "results.html",
         result       = result,
         user_profile = user_profile,
-        top_n        = result["recommendations"][:5],   # show top 5
+        top_n        = result["recommendations"][:5],
+        all_recs     = result["recommendations"],
     )
 
 

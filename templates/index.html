@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CareerMind — AI Career Recommendation System</title>
+  <title>CareerMind — Discover Your Ideal Career</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
@@ -31,21 +31,20 @@
   <!-- ── Hero ───────────────────────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-bg-grid"></div>
+    <div class="hero-glow"></div>
     <div class="hero-content">
-      <p class="hero-eyebrow">Expert System · Knowledge-Based AI</p>
+      <p class="hero-eyebrow">Expert System · Hybrid AI Reasoning</p>
       <h1 class="hero-title">Discover your<br/><em>ideal career path</em></h1>
       <p class="hero-sub">
-        Answer a few questions about yourself. Our rule-based AI reasons over
-        33 expert rules to surface the careers best aligned with your profile —
-        with full, transparent explanations.
+        Answer a few questions about yourself. Our three-layer hybrid engine —
+        knowledge graph, symbolic rules, and forward chaining — reasons over
+        your profile to surface the careers that truly fit.
       </p>
-    </div>
-    <div class="hero-badge">
-      <span>33 Rules</span>
-      <span>|</span>
-      <span>Forward Chaining</span>
-      <span>|</span>
-      <span>Explainable AI</span>
+      <div class="hero-badges">
+        <span class="hero-badge-pill"><span class="dot"></span>66 Expert Rules</span>
+        <span class="hero-badge-pill"><span class="dot dot-v"></span>Knowledge Graph</span>
+        <span class="hero-badge-pill"><span class="dot dot-g"></span>Explainable AI</span>
+      </div>
     </div>
   </section>
 
@@ -56,10 +55,10 @@
       <!-- ── Step 1: Interests ─────────────────────────────────────────── -->
       <section class="form-section" id="step-interests">
         <div class="section-header">
-          <span class="step-num">01</span>
+          <span class="step-badge">01</span>
           <div>
             <h2 class="section-title">What excites you?</h2>
-            <p class="section-hint">Select all areas that genuinely interest you.</p>
+            <p class="section-hint">Select every area that genuinely interests you — the more you pick, the more accurate the results.</p>
           </div>
         </div>
 
@@ -76,38 +75,88 @@
       <!-- ── Step 2: Skills ────────────────────────────────────────────── -->
       <section class="form-section" id="step-skills">
         <div class="section-header">
-          <span class="step-num">02</span>
+          <span class="step-badge">02</span>
           <div>
             <h2 class="section-title">What are your strengths?</h2>
-            <p class="section-hint">Choose the skills you feel confident about.</p>
+            <p class="section-hint">Choose the skills you feel confident about. Skills are grouped by category.</p>
           </div>
         </div>
 
-        <div class="chips-grid">
-          {% for key, label in skills %}
-          <label class="chip chip--skill">
-            <input type="checkbox" name="skills" value="{{ key }}" />
-            <span>{{ label }}</span>
-          </label>
-          {% endfor %}
+        <!-- Technical -->
+        <div class="skill-group">
+          <div class="skill-group-label">Technical</div>
+          <div class="chips-grid">
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_programming" /><span>Programming</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_logical_thinking" /><span>Logical Thinking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_problem_solving" /><span>Problem Solving</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_networking" /><span>Networking / IT</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_mechanical_aptitude" /><span>Mechanical Aptitude</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_data_visualization" /><span>Data Visualization</span></label>
+          </div>
+        </div>
+
+        <!-- Analytical -->
+        <div class="skill-group">
+          <div class="skill-group-label">Analytical</div>
+          <div class="chips-grid">
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_analytical_thinking" /><span>Analytical Thinking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_critical_thinking" /><span>Critical Thinking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_statistics" /><span>Statistics / Math</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_research" /><span>Research Skills</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_strategic_thinking" /><span>Strategic Thinking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_attention_to_detail" /><span>Attention to Detail</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_decision_making" /><span>Decision Making</span></label>
+          </div>
+        </div>
+
+        <!-- Creative -->
+        <div class="skill-group">
+          <div class="skill-group-label">Creative</div>
+          <div class="chips-grid">
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_creativity" /><span>Creativity</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_visual_thinking" /><span>Visual / Spatial Thinking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_writing" /><span>Writing / Documentation</span></label>
+          </div>
+        </div>
+
+        <!-- People & Communication -->
+        <div class="skill-group">
+          <div class="skill-group-label">People &amp; Communication</div>
+          <div class="chips-grid">
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_communication" /><span>Communication</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_empathy" /><span>Empathy / People Skills</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_public_speaking" /><span>Public Speaking</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_negotiation" /><span>Negotiation / Persuasion</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_emotional_intelligence" /><span>Emotional Intelligence</span></label>
+          </div>
+        </div>
+
+        <!-- Management -->
+        <div class="skill-group">
+          <div class="skill-group-label">Management</div>
+          <div class="chips-grid">
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_leadership" /><span>Leadership</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_project_management" /><span>Project Management</span></label>
+            <label class="chip chip--skill"><input type="checkbox" name="skills" value="skill_financial_literacy" /><span>Financial Literacy</span></label>
+          </div>
         </div>
       </section>
 
       <!-- ── Step 3: Academic ──────────────────────────────────────────── -->
       <section class="form-section" id="step-academic">
         <div class="section-header">
-          <span class="step-num">03</span>
+          <span class="step-badge">03</span>
           <div>
-            <h2 class="section-title"><strong>Academic performance</strong></h2>
+            <h2 class="section-title">Academic performance</h2>
             <p class="section-hint">
-              <strong>Subjects shown below adapt to the interests you selected above.</strong>
-              Rate each one from 0–100%.
+              <strong>Subjects adapt to the interests you selected above.</strong>
+              Rate each from 0 – 100%.
             </p>
           </div>
         </div>
 
-        <p id="subjects-empty" class="section-hint" style="margin-top:0.5rem">
-          <strong>Select at least one interest above to reveal subject-wise sliders.</strong>
+        <p id="subjects-empty" class="section-hint" style="margin-top:0.25rem">
+          Select at least one interest above to reveal subject-wise sliders.
         </p>
         <div class="score-grid" id="dynamic-subjects"></div>
       </section>
@@ -118,7 +167,10 @@
           <span class="btn-text">Analyse my profile</span>
           <span class="btn-arrow">→</span>
         </button>
-        <p class="submit-note">The expert system will reason over your inputs using 33 IF-THEN rules.</p>
+        <p class="submit-note">
+          The hybrid engine reasons over your inputs using 66 expert rules,
+          38 symbolic rules, and a knowledge graph traversal.
+        </p>
       </div>
 
     </form>
@@ -126,7 +178,7 @@
 
   <!-- ── Footer ─────────────────────────────────────────────────────────── -->
   <footer class="site-footer">
-    <p>CareerMind · Rule-Based Expert System · Built with Python &amp; Flask</p>
+    <p>CareerMind · <strong>Hybrid Reasoning Engine</strong> · Knowledge Graph + Neuro-Symbolic Rules · Built with Python &amp; Flask</p>
   </footer>
 
   <script>
@@ -136,9 +188,6 @@
     }
 
     // ── Interest → Subjects mapping ──────────────────────────────────────
-    // Each subject has a category used server-side to derive math/science scores.
-    // Categories: "math", "science", "other".  Add new interests by appending
-    // an entry here — the UI will pick them up automatically.
     const SUBJECT_MAP = {
       interest_coding:                 ['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
       interest_artificial_intelligence:['Data Structures','Algorithms','DBMS','Operating Systems','Computer Networks'],
@@ -162,7 +211,6 @@
       interest_environment:            ['Environmental Science','Biology','Geography'],
     };
 
-    // Subject → category (kept in sync with server-side categorisation)
     const SUBJECT_CATEGORY = {
       'Mathematics':'math','Statistics':'math','Algorithms':'math','Data Structures':'math',
       'Data Interpretation':'math','Economics':'math','Cryptography':'math',
@@ -173,14 +221,13 @@
     };
 
     const SUBJECT_ICON = { math:'∑', science:'⚗', other:'✎' };
-    const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
 
     function renderSubjects() {
       const selected = Array.from(
         document.querySelectorAll('input[name="interests"]:checked')
       ).map(cb => cb.value);
 
-      // Union of all subjects, de-duplicated, stable order of first appearance
       const seen = new Set();
       const subjects = [];
       selected.forEach(key => {
@@ -190,7 +237,7 @@
       });
 
       const container = document.getElementById('dynamic-subjects');
-      const empty = document.getElementById('subjects-empty');
+      const empty     = document.getElementById('subjects-empty');
       container.innerHTML = '';
 
       if (subjects.length === 0) {
@@ -200,11 +247,11 @@
       empty.style.display = 'none';
 
       subjects.forEach(subject => {
-        const cat = SUBJECT_CATEGORY[subject] || 'other';
-        const icon = SUBJECT_ICON[cat];
-        const id = 'subj_' + slug(subject);
+        const cat   = SUBJECT_CATEGORY[subject] || 'other';
+        const icon  = SUBJECT_ICON[cat];
+        const id    = 'subj_' + slug(subject);
         const outId = id + '_val';
-        const card = document.createElement('div');
+        const card  = document.createElement('div');
         card.className = 'score-card';
         card.innerHTML = `
           <label for="${id}">
@@ -221,7 +268,7 @@
       });
     }
 
-    // Highlight selected chips + re-render subjects when interests change
+    // Chip toggle + re-render
     document.querySelectorAll('.chip input').forEach(cb => {
       cb.addEventListener('change', () => {
         cb.closest('.chip').classList.toggle('chip--selected', cb.checked);
@@ -229,7 +276,6 @@
       });
     });
 
-    // Initial render (handles page reload with no selections)
     renderSubjects();
 
     // Loading state on submit

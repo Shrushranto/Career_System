@@ -551,6 +551,209 @@ CAREER_RULES = [
         ],
         "weight": 8,
     },
+
+    # ─────────────────────────────────────────────
+    # NEWLY WIRED SKILLS (R48 – R66)
+    # Rules that use skill facts added to SKILL_OPTIONS below.
+    # These give the previously-unused skills real scoring weight.
+    # ─────────────────────────────────────────────
+    {
+        "id": "R48",
+        "career": "Research Scientist",
+        "conditions": ["interest_science", "skill_research", "high_science_score"],
+        "explanation": [
+            "Research skills are the backbone of scientific inquiry",
+            "Strong science scores confirm academic readiness",
+            "Scientific curiosity + hands-on research ability is a natural fit",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R49",
+        "career": "Environmental Scientist",
+        "conditions": ["interest_environment", "skill_research", "skill_analytical_thinking"],
+        "explanation": [
+            "Research skills are essential for environmental fieldwork and studies",
+            "Analytical thinking supports impact assessments and data interpretation",
+            "Environment interest drives the core motivation for this career",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R50",
+        "career": "Content Writer / Journalist",
+        "conditions": ["interest_writing", "skill_writing", "skill_communication"],
+        "explanation": [
+            "Writing skill combined with a passion for writing is the strongest signal",
+            "Communication ability ensures clarity and audience engagement",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R51",
+        "career": "Lawyer",
+        "conditions": ["interest_law", "skill_critical_thinking", "skill_communication"],
+        "explanation": [
+            "Critical thinking is the foundation of legal reasoning and argumentation",
+            "Communication skills are essential for both written briefs and oral advocacy",
+            "Law interest is the core motivator",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R52",
+        "career": "Lawyer",
+        "conditions": ["interest_law", "skill_public_speaking", "skill_analytical_thinking"],
+        "explanation": [
+            "Public speaking is critical for courtroom advocacy and negotiations",
+            "Analytical thinking enables case strategy and legal research",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R53",
+        "career": "Medical Doctor",
+        "conditions": ["interest_medicine", "skill_attention_to_detail", "skill_empathy"],
+        "explanation": [
+            "Attention to detail is vital for accurate diagnosis and treatment",
+            "Empathy is essential for patient-centred care",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R54",
+        "career": "Financial Analyst",
+        "conditions": ["interest_finance", "skill_attention_to_detail", "skill_analytical_thinking"],
+        "explanation": [
+            "Attention to detail is critical in financial modelling and auditing",
+            "Analytical thinking drives investment and market evaluation",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R55",
+        "career": "Database Administrator",
+        "conditions": ["interest_coding", "skill_attention_to_detail", "skill_problem_solving"],
+        "explanation": [
+            "Attention to detail is crucial for schema design and query optimisation",
+            "Problem-solving is needed for performance tuning and incident resolution",
+            "Coding interest provides the scripting and automation foundation",
+        ],
+        "weight": 7,
+    },
+    {
+        "id": "R56",
+        "career": "Mechanical Engineer",
+        "conditions": ["interest_engineering", "skill_mechanical_aptitude", "skill_problem_solving"],
+        "explanation": [
+            "Mechanical aptitude is the defining trait of this engineering discipline",
+            "Problem-solving drives design iteration and fault analysis",
+            "Engineering interest aligns directly with mechanical systems work",
+        ],
+        "weight": 10,
+    },
+    {
+        "id": "R57",
+        "career": "Robotics Engineer",
+        "conditions": ["interest_electronics", "skill_mechanical_aptitude", "skill_programming"],
+        "explanation": [
+            "Mechanical aptitude supports the hardware and actuator side of robotics",
+            "Programming enables control systems and autonomous behaviour",
+            "Electronics interest provides the sensor and circuit knowledge needed",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R58",
+        "career": "Data Scientist",
+        "conditions": ["interest_data_analysis", "skill_data_visualization", "skill_statistics"],
+        "explanation": [
+            "Data visualisation is how insights are communicated to stakeholders",
+            "Statistics underpins every modelling and analysis task in data science",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R59",
+        "career": "Business Analyst",
+        "conditions": ["interest_business", "skill_strategic_thinking", "skill_analytical_thinking"],
+        "explanation": [
+            "Strategic thinking helps identify process improvements and growth opportunities",
+            "Analytical thinking is needed to evaluate business data and requirements",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R60",
+        "career": "Entrepreneur",
+        "conditions": ["interest_business", "skill_strategic_thinking", "skill_leadership"],
+        "explanation": [
+            "Strategic thinking is essential for business planning and market positioning",
+            "Leadership is required to build and guide a founding team",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R61",
+        "career": "Teacher / Educator",
+        "conditions": ["interest_education", "skill_public_speaking", "skill_communication"],
+        "explanation": [
+            "Public speaking is the primary delivery mechanism in teaching",
+            "Communication skills ensure lessons are clear and engaging",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R62",
+        "career": "Teacher / Educator",
+        "conditions": ["interest_education", "skill_emotional_intelligence", "skill_empathy"],
+        "explanation": [
+            "Emotional intelligence allows teachers to respond to diverse student needs",
+            "Empathy builds trust and a supportive classroom environment",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R63",
+        "career": "Human Resources Manager",
+        "conditions": ["interest_business", "skill_emotional_intelligence", "skill_communication"],
+        "explanation": [
+            "Emotional intelligence is the core competency of effective HR professionals",
+            "Communication skills facilitate conflict resolution and talent management",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R64",
+        "career": "Social Worker",
+        "conditions": ["interest_social_work", "skill_emotional_intelligence", "skill_empathy"],
+        "explanation": [
+            "Emotional intelligence enables nuanced understanding of vulnerable situations",
+            "Empathy is the most critical trait for building trust with clients",
+        ],
+        "weight": 9,
+    },
+    {
+        "id": "R65",
+        "career": "Marketing Specialist",
+        "conditions": ["interest_marketing", "skill_public_speaking", "skill_communication"],
+        "explanation": [
+            "Public speaking is key for pitches, presentations, and brand storytelling",
+            "Communication skills are at the heart of all marketing work",
+        ],
+        "weight": 8,
+    },
+    {
+        "id": "R66",
+        "career": "Project Manager",
+        "conditions": ["skill_decision_making", "skill_leadership", "skill_project_management"],
+        "explanation": [
+            "Decision-making under uncertainty is central to project delivery",
+            "Leadership keeps teams motivated and aligned to project goals",
+            "Project management skills are directly applicable to this role",
+        ],
+        "weight": 8,
+    },
 ]
 
 # ── Fact vocabulary ────────────────────────────────────────────────────────────
@@ -582,39 +785,37 @@ INTEREST_OPTIONS = [
 ]
 
 SKILL_OPTIONS = [
+    # ── Technical ──────────────────────────────────────────────────────────
     ("skill_programming",          "Programming"),
     ("skill_logical_thinking",     "Logical Thinking"),
     ("skill_problem_solving",      "Problem Solving"),
-    ("skill_analytical_thinking",  "Analytical Thinking"),
-    ("skill_statistics",           "Statistics / Math"),
     ("skill_networking",           "Networking / IT"),
-    ("skill_creativity",           "Creativity"),
-    ("skill_communication",        "Communication"),
-    ("skill_empathy",              "Empathy / People Skills"),
-    ("skill_leadership",           "Leadership"),
-    ("skill_project_management",   "Project Management"),
-    ("skill_visual_thinking",      "Visual / Spatial Thinking"),
-    ("skill_critical_thinking",    "Critical Thinking"),
-    ("skill_teamwork",             "Teamwork / Collaboration"),
-    ("skill_adaptability",         "Adaptability / Flexibility"),
-    ("skill_time_management",      "Time Management"),
-    ("skill_attention_to_detail",  "Attention to Detail"),
-    ("skill_research",             "Research Skills"),
-    ("skill_writing",              "Writing / Documentation"),
-    ("skill_public_speaking",      "Public Speaking / Presentation"),
-    ("skill_negotiation",          "Negotiation / Persuasion"),
-    ("skill_decision_making",      "Decision Making"),
-    ("skill_organization",         "Organizational Skills"),
-    ("skill_multitasking",         "Multitasking"),
-    ("skill_conflict_resolution",  "Conflict Resolution"),
-    ("skill_observation",          "Observation / Perception"),
-    ("skill_curiosity",            "Curiosity / Love of Learning"),
-    ("skill_patience",             "Patience / Perseverance"),
-    ("skill_self_motivation",      "Self-Motivation / Discipline"),
-    ("skill_emotional_intelligence", "Emotional Intelligence"),
-    ("skill_financial_literacy",   "Financial Literacy"),
-    ("skill_language_skills",      "Foreign Language Skills"),
     ("skill_mechanical_aptitude",  "Mechanical Aptitude"),
     ("skill_data_visualization",   "Data Visualization"),
+
+    # ── Analytical ─────────────────────────────────────────────────────────
+    ("skill_analytical_thinking",  "Analytical Thinking"),
+    ("skill_critical_thinking",    "Critical Thinking"),
+    ("skill_statistics",           "Statistics / Math"),
+    ("skill_research",             "Research Skills"),
     ("skill_strategic_thinking",   "Strategic Thinking"),
+    ("skill_attention_to_detail",  "Attention to Detail"),
+    ("skill_decision_making",      "Decision Making"),
+
+    # ── Creative ───────────────────────────────────────────────────────────
+    ("skill_creativity",           "Creativity"),
+    ("skill_visual_thinking",      "Visual / Spatial Thinking"),
+    ("skill_writing",              "Writing / Documentation"),
+
+    # ── People & Communication ─────────────────────────────────────────────
+    ("skill_communication",        "Communication"),
+    ("skill_empathy",              "Empathy / People Skills"),
+    ("skill_public_speaking",      "Public Speaking"),
+    ("skill_negotiation",          "Negotiation / Persuasion"),
+    ("skill_emotional_intelligence", "Emotional Intelligence"),
+
+    # ── Management ─────────────────────────────────────────────────────────
+    ("skill_leadership",           "Leadership"),
+    ("skill_project_management",   "Project Management"),
+    ("skill_financial_literacy",   "Financial Literacy"),
 ]

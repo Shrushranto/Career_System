@@ -1,24 +1,43 @@
 """
-inference.py — Forward-Chaining Inference Engine
-==================================================
-This module implements the core AI reasoning component of the expert system.
+inference.py — Hybrid Reasoning Engine
+========================================
+Combines three complementary reasoning layers:
 
-HOW FORWARD CHAINING WORKS:
-  1. User inputs are converted into FACTS and loaded into "Working Memory".
-  2. The engine iterates through every rule in the knowledge base.
-  3. If ALL conditions of a rule are satisfied by the current facts → rule FIRES.
-  4. Fired rules contribute their career recommendation + explanation + weight.
-  5. Multiple rules can fire for the same career; scores are accumulated.
-  6. Results are sorted by score (descending) to produce a ranked recommendation list.
+  1. Classic forward-chaining  (rules.py → CAREER_RULES)
+     Boolean IF-THEN rules over working memory facts.
+     Produces a per-career Classic Rule Score.
 
-This makes the system EXPLAINABLE — we can trace exactly which rules fired and why.
+  2. Neuro-Symbolic rules       (symbolic_rules.py → NEURO_SYMBOLIC_RULES)
+     Explicit IF-THEN rules that blend boolean facts with numeric thresholds.
+     Produces a per-career NS Score.
+
+  3. Knowledge Graph traversal  (knowledge_graph.py)
+     Multi-hop paths through an Interest/Skill/Subject/Career graph.
+     Produces a per-career Graph Score.
+
+Fusion formula
+--------------
+  Rule Score   = 0.5 × Classic Score (norm.) + 0.5 × NS Score (norm.)
+  Final Score  = α × Graph Score + β × Rule Score
+                 α = 0.5,  β = 0.5
+
+All component scores are normalised to [0, 1] before fusion.
+The top career always shows 100 % relative confidence.
 """
 
+import re
+
 from rules import CAREER_RULES
+from knowledge_graph import score_careers_from_graph
+from symbolic_rules import run_symbolic_rules
+
+# Fusion weights (must sum to 1)
+ALPHA = 0.5   # knowledge-graph contribution
+BETA  = 0.5   # rule-based contribution
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# WORKING MEMORY BUILDER
+# WORKING MEMORY BUILDER  (unchanged from original)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def build_working_memory(interests: list, skills: list, academic: dict) -> set:
@@ -29,47 +48,31 @@ def build_working_memory(interests: list, skills: list, academic: dict) -> set:
     ----------
     interests : list of str  — selected interest fact-keys (e.g. 'interest_coding')
     skills    : list of str  — selected skill fact-keys  (e.g. 'skill_programming')
-    academic  : dict         — {'math': int, 'science': int, 'overall': int}
-                               scores are expected as percentages (0-100)
-
-    Returns
-    -------
-    set of str — active facts for forward chaining
+    academic  : dict         — {'math': int, 'science': int, 'overall': int,
+                                'subjects': {name: score}}
+                               Scores are expected as percentages (0-100).
     """
     memory = set()
 
-    # Assert interest facts
     for interest in interests:
         memory.add(interest)
-
-    # Assert skill facts
     for skill in skills:
         memory.add(skill)
 
-    # Assert academic performance facts using thresholds
-    math_score    = academic.get("math", 0)
+    math_score    = academic.get("math",    0)
     science_score = academic.get("science", 0)
     overall_score = academic.get("overall", 0)
 
-    # Threshold: ≥ 65 → "high" for that subject
-    if math_score >= 65:
-        memory.add("high_math_score")
-    if science_score >= 65:
-        memory.add("high_science_score")
-    if overall_score >= 70:
-        memory.add("high_overall_score")
+    if math_score    >= 65: memory.add("high_math_score")
+    if science_score >= 65: memory.add("high_science_score")
+    if overall_score >= 70: memory.add("high_overall_score")
 
-    # Extra derived facts based on combined scores
     if math_score >= 80 and science_score >= 80:
         memory.add("strong_stem_background")
     if overall_score >= 85:
         memory.add("academic_excellence")
 
-    # Per-subject facts (≥70 → high_<slug>_score).  Subjects originate from
-    # the dynamic Academic Performance UI; the slug uses lowercase + underscore
-    # so rules can reference `high_data_structures_score`, `high_dbms_score`,
-    # `high_cryptography_score`, etc.
-    import re
+    # Per-subject facts  (≥70 → high_<slug>_score)
     subjects = academic.get("subjects", {}) or {}
     for name, score in subjects.items():
         try:
@@ -85,128 +88,161 @@ def build_working_memory(interests: list, skills: list, academic: dict) -> set:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# FORWARD CHAINING ENGINE
+# CLASSIC FORWARD-CHAINING  (unchanged logic, used as one score component)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_inference(working_memory: set) -> list:
     """
-    Execute forward chaining over the knowledge base.
-
-    For each rule in CAREER_RULES:
-      - Check if ALL rule conditions are present in working memory
-      - If yes → rule fires; accumulate score and explanation for that career
-
-    Parameters
-    ----------
-    working_memory : set of str — facts derived from user inputs
-
-    Returns
-    -------
-    list of dict sorted by confidence score (descending):
-      [
-        {
-          "career"      : str,
-          "score"       : int,
-          "confidence"  : float (0-100 %),
-          "rules_fired" : list of rule IDs,
-          "explanations": list of str,
-        },
-        ...
-      ]
+    Execute forward chaining over CAREER_RULES.
+    Returns a list of career dicts sorted by score (descending).
+    This is kept as a standalone function for backwards compatibility
+    and is called internally by get_recommendations.
     """
-
-    # career_data holds aggregated results per career
-    career_data = {}
+    career_data: dict = {}
 
     for rule in CAREER_RULES:
-        rule_id    = rule["id"]
-        career     = rule["career"]
-        conditions = rule["conditions"]
-        weight     = rule["weight"]
-        explanation = rule["explanation"]
-
-        # ── CONDITION CHECK (AND logic) ───────────────────────────────────────
-        matched_conditions = [c for c in conditions if c in working_memory]
-        all_matched        = len(matched_conditions) == len(conditions)
-
-        if all_matched:
-            # Rule fires ✓
+        if all(c in working_memory for c in rule["conditions"]):
+            career = rule["career"]
             if career not in career_data:
                 career_data[career] = {
-                    "career"      : career,
-                    "score"       : 0,
-                    "rules_fired" : [],
-                    "explanations": [],
+                    "career": career, "score": 0,
+                    "rules_fired": [], "explanations": [],
                 }
-
-            career_data[career]["score"]       += weight
-            career_data[career]["rules_fired"].append(rule_id)
-            # Extend explanations, avoiding duplicate bullet points
-            for point in explanation:
+            career_data[career]["score"]       += rule["weight"]
+            career_data[career]["rules_fired"].append(rule["id"])
+            for point in rule["explanation"]:
                 if point not in career_data[career]["explanations"]:
                     career_data[career]["explanations"].append(point)
 
     if not career_data:
         return []
 
-    # ── NEURO-SYMBOLIC CONFIDENCE SCORING ────────────────────────────────────
-    # Compute the theoretical maximum score: sum of weights of rules that
-    # could have fired (only those whose career appeared at all).
-    # We normalise each career's score against the global maximum to get
-    # a meaningful confidence percentage.
-    max_possible = sum(r["weight"] for r in CAREER_RULES)  # upper bound
-    actual_max   = max(d["score"] for d in career_data.values())
+    actual_max = max(d["score"] for d in career_data.values())
+    # absolute_confidence: score as % of the highest theoretically achievable
+    # score for that specific career (sum of weights of rules that target it).
+    career_max_possible: dict[str, int] = {}
+    for r in CAREER_RULES:
+        career_max_possible[r["career"]] = career_max_possible.get(r["career"], 0) + r["weight"]
 
     results = []
     for data in career_data.values():
-        # Confidence = score as a fraction of the highest-scoring career × 100
-        # This ensures the top career always shows ~100% relative confidence,
-        # while others are proportionally ranked.
-        relative_confidence = round((data["score"] / actual_max) * 100, 1)
-
-        # Absolute confidence = fraction of theoretical max (shows raw strength)
-        absolute_confidence = round((data["score"] / max_possible) * 100, 1)
-
+        max_for_career = career_max_possible.get(data["career"], 1)
         results.append({
-            "career"             : data["career"],
-            "score"              : data["score"],
-            "confidence"         : relative_confidence,   # shown in UI
-            "absolute_confidence": absolute_confidence,
-            "rules_fired"        : data["rules_fired"],
-            "explanations"       : data["explanations"],
+            **data,
+            "confidence"         : round(data["score"] / actual_max * 100, 1),
+            "absolute_confidence": round(data["score"] / max_for_career * 100, 1),
             "rules_count"        : len(data["rules_fired"]),
         })
 
-    # Sort: primary by score descending, secondary by number of rules fired
     results.sort(key=lambda x: (x["score"], x["rules_count"]), reverse=True)
-
     return results
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CONVENIENCE WRAPPER
+# HYBRID FUSION ENGINE
 # ─────────────────────────────────────────────────────────────────────────────
 
 def get_recommendations(interests: list, skills: list, academic: dict) -> dict:
     """
     High-level entry point called by app.py.
 
+    Runs all three reasoning layers and fuses their scores.
+
     Returns
     -------
     dict:
       {
-        "working_memory"  : list  — active facts (for debug / transparency),
-        "recommendations" : list  — ranked career recommendations,
-        "top_career"      : dict | None,
-        "total_rules_fired": int,
+        "working_memory"    : list  — active facts (for transparency),
+        "recommendations"   : list  — ranked career recommendations,
+        "top_career"        : dict | None,
+        "total_rules_fired" : int,
+        "alpha"             : float — graph weight used in fusion,
+        "beta"              : float — rule weight used in fusion,
       }
+
+    Each recommendation dict contains:
+      career, final_score, graph_score, rule_score, classic_score, ns_score,
+      confidence (relative %), score (0–100 display int),
+      explanations, rules_fired, triggered_ns_rules, top_paths, rules_count
     """
-    wm      = build_working_memory(interests, skills, academic)
-    results = run_inference(wm)
+    wm = build_working_memory(interests, skills, academic)
+
+    # ── Layer 1: Classic forward-chaining ────────────────────────────────
+    classic_results = run_inference(wm)
+    classic_by_career = {r["career"]: r for r in classic_results}
+    classic_max = max((r["score"] for r in classic_results), default=1)
+
+    # ── Layer 2: Neuro-symbolic rules ────────────────────────────────────
+    ns_results = run_symbolic_rules(wm, academic)
+
+    # ── Layer 3: Knowledge graph traversal ───────────────────────────────
+    graph_results = score_careers_from_graph(wm)
+
+    # ── Fusion ───────────────────────────────────────────────────────────
+    all_careers = (
+        set(classic_by_career.keys())
+        | set(ns_results.keys())
+        | set(graph_results.keys())
+    )
+
+    fused = []
+    for career in all_careers:
+        # Classic score normalised to [0, 1]
+        if career in classic_by_career and classic_max > 0:
+            classic_norm = round(classic_by_career[career]["score"] / classic_max, 4)
+        else:
+            classic_norm = 0.0
+
+        # NS score (already normalised in symbolic_rules.py)
+        ns_norm = ns_results[career]["normalized_score"] if career in ns_results else 0.0
+
+        # Combined rule score: fixed 50/50 average of both normalised signals.
+        # Using a consistent formula regardless of which layers fired prevents the
+        # old bug where dual-layer agreement scored the same as single-layer evidence.
+        rule_score = round(0.5 * classic_norm + 0.5 * ns_norm, 4)
+
+        # Graph score (already normalised in knowledge_graph.py)
+        graph_score = (
+            graph_results[career]["normalized_score"] if career in graph_results else 0.0
+        )
+
+        # Final fused score
+        final_score = round(ALPHA * graph_score + BETA * rule_score, 4)
+
+        # Explainability data
+        explanations  = classic_by_career[career]["explanations"]  if career in classic_by_career else []
+        rules_fired   = classic_by_career[career]["rules_fired"]   if career in classic_by_career else []
+        ns_rules      = ns_results[career]["triggered_rules"]      if career in ns_results       else []
+        top_paths     = graph_results[career]["top_paths"]         if career in graph_results    else []
+
+        fused.append({
+            "career"           : career,
+            "final_score"      : final_score,
+            "graph_score"      : round(graph_score, 4),
+            "rule_score"       : round(rule_score,  4),
+            "classic_score"    : round(classic_norm, 4),
+            "ns_score"         : round(ns_norm,      4),
+            "explanations"     : explanations,
+            "rules_fired"      : rules_fired,
+            "triggered_ns_rules": ns_rules,
+            "top_paths"        : top_paths,
+            "rules_count"      : len(rules_fired),
+        })
+
+    # Sort by final score descending
+    fused.sort(key=lambda x: x["final_score"], reverse=True)
+
+    # Add relative confidence and integer display score
+    top_final = fused[0]["final_score"] if fused else 1.0
+    for rec in fused:
+        rec["confidence"] = round(rec["final_score"] / top_final * 100, 1) if top_final > 0 else 0.0
+        rec["score"]      = round(rec["final_score"] * 100)  # 0–100 display int
 
     return {
-        "working_memory"   : sorted(list(wm)),
-        "recommendations"  : results,
-        "top_career"       : results[0] if results else None,
-        "total_rules_fired": sum(r["rules_count"] for r in results),
+        "working_memory"    : sorted(list(wm)),
+        "recommendations"   : fused,
+        "top_career"        : fused[0] if fused else None,
+        "total_rules_fired" : sum(r["rules_count"] for r in fused),
+        "alpha"             : ALPHA,
+        "beta"              : BETA,
     }

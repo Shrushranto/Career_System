@@ -8,8 +8,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
   <script src="/static/theme.js"></script>
+  <style>
+    /* SVG gradient definition (inline so it works cross-browser) */
+    .ring-grad-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+  </style>
 </head>
 <body class="results-page">
+
+  <!-- SVG gradient used by confidence ring -->
+  <svg class="ring-grad-defs" aria-hidden="true">
+    <defs>
+      <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="var(--accent)" />
+        <stop offset="100%" stop-color="var(--accent-2)" />
+      </linearGradient>
+    </defs>
+  </svg>
 
   <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="site-header">
@@ -48,12 +62,15 @@
     <!-- ── Top Banner ───────────────────────────────────────────────────── -->
     <div class="results-banner">
       <div class="banner-left">
-        <p class="banner-eyebrow">Top Recommendation</p>
+        <p class="banner-eyebrow"><strong>Top Recommendation — Hybrid Reasoning Engine</strong></p>
         <h1 class="banner-career">{{ result.top_career.career }}</h1>
         <div class="banner-meta">
           <span class="tag tag--green">{{ result.top_career.rules_count }} rule{{ 's' if result.top_career.rules_count != 1 }} fired</span>
           <span class="tag tag--blue">{{ result.total_rules_fired }} total activations</span>
           <span class="tag tag--purple">{{ result.recommendations|length }} careers matched</span>
+          <span class="tag tag--score">
+            <strong>α={{ result.alpha }} Graph · β={{ result.beta }} Rules</strong>
+          </span>
         </div>
       </div>
       <div class="banner-right">
@@ -71,16 +88,128 @@
       </div>
     </div>
 
-    <!-- ── Explanation Card ──────────────────────────────────────────────── -->
+    <!-- ── Hybrid Score Breakdown ────────────────────────────────────────── -->
     <section class="explain-card">
       <h3 class="explain-title">
-        <span class="explain-icon">🔍</span> Why <em>{{ result.top_career.career }}</em>?
+        <span class="explain-icon">⚗</span>
+        <strong>Hybrid Score Breakdown</strong>
+        <span style="font-size:.8rem;opacity:.6;font-weight:400;">— {{ result.top_career.career }}</span>
       </h3>
-      <p class="explain-intro">
-        The inference engine matched <strong>{{ result.top_career.rules_count }} rule(s)</strong>
-        ({{ result.top_career.rules_fired | join(', ') }}) from the knowledge base.
-        Here is the reasoning chain:
+
+      <div class="score-breakdown-card">
+        <div class="score-breakdown-title">Fusion Formula</div>
+        <div class="formula-row">
+          Final Score = α × Graph Score + β × Rule Score &nbsp;|&nbsp; α = {{ result.alpha }}, β = {{ result.beta }}
+        </div>
+        <div style="display:flex;align-items:baseline;gap:1.25rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:.73rem;opacity:.6;margin-bottom:.15rem;">Final Score</div>
+            <div class="final-score-badge">{{ '%g' % result.top_career.final_score }}</div>
+          </div>
+          <div style="font-size:.8rem;opacity:.75;">
+            = {{ result.alpha }} × <strong>{{ result.top_career.graph_score }}</strong>
+            &nbsp;+&nbsp; {{ result.beta }} × <strong>{{ result.top_career.rule_score }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="fusion-legend">
+        <span class="fusion-chip"><span class="fusion-dot fd-graph"></span><strong>Graph Score</strong> (NetworkX, α={{ result.alpha }})</span>
+        <span class="fusion-chip"><span class="fusion-dot fd-rule"></span><strong>Rule Score</strong> (Symbolic, β={{ result.beta }})</span>
+      </div>
+
+      <div class="hybrid-bar-row">
+        <span class="hybrid-bar-label">Graph Score</span>
+        <div class="hybrid-bar-track">
+          <div class="hybrid-bar-fill hybrid-bar-fill--graph"
+               style="width:{{ (result.top_career.graph_score * 100)|round|int }}%"></div>
+        </div>
+        <span class="hybrid-bar-val">{{ result.top_career.graph_score }}</span>
+      </div>
+      <div class="hybrid-bar-row">
+        <span class="hybrid-bar-label">Rule Score</span>
+        <div class="hybrid-bar-track">
+          <div class="hybrid-bar-fill hybrid-bar-fill--rule"
+               style="width:{{ (result.top_career.rule_score * 100)|round|int }}%"></div>
+        </div>
+        <span class="hybrid-bar-val">{{ result.top_career.rule_score }}</span>
+      </div>
+      <div class="hybrid-bar-row" style="margin-top:.2rem;opacity:.65;font-size:.74rem;">
+        <span class="hybrid-bar-label">&nbsp;↳ Classic</span>
+        <div class="hybrid-bar-track">
+          <div class="hybrid-bar-fill hybrid-bar-fill--classic"
+               style="width:{{ (result.top_career.classic_score * 100)|round|int }}%"></div>
+        </div>
+        <span class="hybrid-bar-val">{{ result.top_career.classic_score }}</span>
+      </div>
+      <div class="hybrid-bar-row" style="opacity:.65;font-size:.74rem;">
+        <span class="hybrid-bar-label">&nbsp;↳ Symbolic</span>
+        <div class="hybrid-bar-track">
+          <div class="hybrid-bar-fill hybrid-bar-fill--ns"
+               style="width:{{ (result.top_career.ns_score * 100)|round|int }}%"></div>
+        </div>
+        <span class="hybrid-bar-val">{{ result.top_career.ns_score }}</span>
+      </div>
+    </section>
+
+    <!-- ── Knowledge Graph Paths ─────────────────────────────────────────── -->
+    {% if result.top_career.top_paths %}
+    <section class="explain-card">
+      <h3 class="explain-title">
+        <span class="explain-icon">🕸</span>
+        <strong>Knowledge Graph Reasoning Paths</strong>
+      </h3>
+      <p style="font-size:.82rem;opacity:.7;margin-bottom:.7rem;">
+        Top traversal paths from your interests/skills to
+        <em style="color:var(--accent);">{{ result.top_career.career }}</em>.
+        Path score = product of edge weights.
       </p>
+      <ul class="path-list">
+        {% for p in result.top_career.top_paths %}
+        <li class="path-item">
+          <span class="path-chain">{{ p.path }}</span>
+          <span class="path-score">{{ p.score }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <!-- ── Triggered Symbolic Rules ─────────────────────────────────────── -->
+    {% if result.top_career.triggered_ns_rules %}
+    <section class="explain-card">
+      <h3 class="explain-title">
+        <span class="explain-icon">⚡</span>
+        <strong>Triggered Symbolic Rules</strong>
+      </h3>
+      <p style="font-size:.82rem;opacity:.7;margin-bottom:.7rem;">
+        Explicit IF-THEN rules that fired for
+        <em style="color:var(--accent);">{{ result.top_career.career }}</em>,
+        blending boolean facts with numeric thresholds.
+      </p>
+      <ul class="ns-rule-list">
+        {% for r in result.top_career.triggered_ns_rules %}
+        <li class="ns-rule-item">
+          <span class="ns-rule-id">{{ r.id }}</span>
+          <span>{{ r.label }}</span>
+          <span class="ns-boost">+{{ r.boost }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <!-- ── Classic Rule Explanation ─────────────────────────────────────── -->
+    {% if result.top_career.explanations %}
+    <section class="explain-card">
+      <h3 class="explain-title">
+        <span class="explain-icon">🔍</span>
+        Why <em>{{ result.top_career.career }}</em>?
+        <span style="font-size:.74rem;opacity:.55;font-weight:400;margin-left:.4rem;">
+          ({{ result.top_career.rules_count }} rule{{ 's' if result.top_career.rules_count != 1 }}:
+          {{ result.top_career.rules_fired | join(', ') }})
+        </span>
+      </h3>
       <ul class="reason-list">
         {% for reason in result.top_career.explanations %}
         <li class="reason-item">
@@ -90,6 +219,7 @@
         {% endfor %}
       </ul>
     </section>
+    {% endif %}
 
     <!-- ── Profile Used ──────────────────────────────────────────────────── -->
     <section class="profile-used">
@@ -137,8 +267,10 @@
 
     <!-- ── Top 5 Ranked Careers ──────────────────────────────────────────── -->
     <section class="ranked-section">
-      <h3 class="ranked-title">All Matched Careers</h3>
-      <p class="ranked-sub">Ranked by inference engine score (highest first)</p>
+      <h3 class="ranked-title"><strong>Top Matched Careers</strong></h3>
+      <p class="ranked-sub">
+        Ranked by <strong>Final Score = {{ result.alpha }}×Graph + {{ result.beta }}×Rule</strong>
+      </p>
 
       <div class="ranked-list">
         {% for rec in top_n %}
@@ -148,39 +280,148 @@
             <div class="rank-header">
               <h4 class="rank-career">{{ rec.career }}</h4>
               <div class="rank-badges">
-                <span class="tag tag--score">Score: {{ rec.score }}</span>
+                <span class="tag tag--score">{{ rec.final_score }}</span>
                 <span class="tag tag--conf">{{ '%g' % rec.confidence }}%</span>
               </div>
             </div>
-            <!-- Confidence bar -->
+
             <div class="conf-bar-wrap">
               <div class="conf-bar" style="width: {{ rec.confidence }}%"></div>
             </div>
-            <!-- Rules fired -->
+
+            <div style="margin:.3rem 0 .25rem;">
+              <div class="hybrid-bar-row">
+                <span class="hybrid-bar-label">Graph</span>
+                <div class="hybrid-bar-track">
+                  <div class="hybrid-bar-fill hybrid-bar-fill--graph"
+                       style="width:{{ (rec.graph_score * 100)|round|int }}%"></div>
+                </div>
+                <span class="hybrid-bar-val">{{ rec.graph_score }}</span>
+              </div>
+              <div class="hybrid-bar-row">
+                <span class="hybrid-bar-label">Rule</span>
+                <div class="hybrid-bar-track">
+                  <div class="hybrid-bar-fill hybrid-bar-fill--rule"
+                       style="width:{{ (rec.rule_score * 100)|round|int }}%"></div>
+                </div>
+                <span class="hybrid-bar-val">{{ rec.rule_score }}</span>
+              </div>
+            </div>
+
             <div class="rule-pills">
               {% for r in rec.rules_fired %}
               <span class="rule-pill">{{ r }}</span>
               {% endfor %}
+              {% for r in rec.triggered_ns_rules %}
+              <span class="rule-pill" style="background:rgba(251,146,60,.12);color:var(--accent-warm);">{{ r.id }}</span>
+              {% endfor %}
             </div>
-            <!-- Collapsible reasoning -->
+
             <details class="rank-details">
-              <summary>View reasoning ({{ rec.explanations|length }} points)</summary>
+              <summary>
+                View full reasoning
+                ({{ rec.explanations|length }} classic,
+                 {{ rec.top_paths|length }} graph path{{ 's' if rec.top_paths|length != 1 }},
+                 {{ rec.triggered_ns_rules|length }} symbolic)
+              </summary>
+
+              {% if rec.top_paths %}
+              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Graph Paths</p>
+              <ul class="path-list">
+                {% for p in rec.top_paths %}
+                <li class="path-item">
+                  <span class="path-chain">{{ p.path }}</span>
+                  <span class="path-score">{{ p.score }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if rec.triggered_ns_rules %}
+              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Symbolic Rules</p>
+              <ul class="ns-rule-list">
+                {% for r in rec.triggered_ns_rules %}
+                <li class="ns-rule-item">
+                  <span class="ns-rule-id">{{ r.id }}</span>
+                  <span>{{ r.label }}</span>
+                  <span class="ns-boost">+{{ r.boost }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if rec.explanations %}
+              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Classic Rule Reasoning</p>
               <ul class="mini-reason-list">
                 {% for point in rec.explanations %}
                 <li>{{ point }}</li>
                 {% endfor %}
               </ul>
+              {% endif %}
             </details>
           </div>
         </div>
         {% endfor %}
       </div>
+
+      <!-- Show all remaining careers -->
+      {% if all_recs|length > 5 %}
+      <button class="show-all-btn" id="showAllBtn" onclick="toggleAllCareers()">
+        <span id="showAllLabel">Show all {{ all_recs|length }} matched careers ↓</span>
+      </button>
+
+      <div class="all-careers-list" id="allCareers">
+        {% for rec in all_recs[5:] %}
+        <div class="ranked-card">
+          <div class="rank-num">#{{ loop.index + 5 }}</div>
+          <div class="rank-body">
+            <div class="rank-header">
+              <h4 class="rank-career">{{ rec.career }}</h4>
+              <div class="rank-badges">
+                <span class="tag tag--score">{{ rec.final_score }}</span>
+                <span class="tag tag--conf">{{ '%g' % rec.confidence }}%</span>
+              </div>
+            </div>
+            <div class="conf-bar-wrap">
+              <div class="conf-bar" style="width: {{ rec.confidence }}%"></div>
+            </div>
+            <div class="hybrid-bar-row" style="margin-top:.25rem;">
+              <span class="hybrid-bar-label">Graph</span>
+              <div class="hybrid-bar-track">
+                <div class="hybrid-bar-fill hybrid-bar-fill--graph"
+                     style="width:{{ (rec.graph_score * 100)|round|int }}%"></div>
+              </div>
+              <span class="hybrid-bar-val">{{ rec.graph_score }}</span>
+            </div>
+            <div class="hybrid-bar-row">
+              <span class="hybrid-bar-label">Rule</span>
+              <div class="hybrid-bar-track">
+                <div class="hybrid-bar-fill hybrid-bar-fill--rule"
+                     style="width:{{ (rec.rule_score * 100)|round|int }}%"></div>
+              </div>
+              <span class="hybrid-bar-val">{{ rec.rule_score }}</span>
+            </div>
+            {% if rec.explanations or rec.triggered_ns_rules or rec.top_paths %}
+            <details class="rank-details" style="margin-top:.4rem;">
+              <summary>View reasoning</summary>
+              {% if rec.explanations %}
+              <ul class="mini-reason-list" style="margin-top:.4rem;">
+                {% for point in rec.explanations %}<li>{{ point }}</li>{% endfor %}
+              </ul>
+              {% endif %}
+            </details>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </section>
 
-    <!-- ── Working Memory (transparency) ────────────────────────────────── -->
+    <!-- ── Working Memory ────────────────────────────────────────────────── -->
     <section class="wm-section">
       <h3 class="wm-title">Working Memory (Active Facts)</h3>
-      <p class="wm-sub">These are the facts asserted into the inference engine from your inputs.</p>
+      <p class="wm-sub">All facts asserted into the inference engine from your inputs.</p>
       <div class="wm-facts">
         {% for fact in result.working_memory %}
         <span class="fact-chip">{{ fact }}</span>
@@ -201,16 +442,34 @@
   </main>
 
   <footer class="site-footer">
-    <p>CareerMind · Rule-Based Expert System · Built with Python &amp; Flask</p>
+    <p>CareerMind · <strong>Hybrid Reasoning Engine</strong> · Knowledge Graph + Neuro-Symbolic Rules · Built with Python &amp; Flask</p>
   </footer>
 
   <script>
-    // Animate confidence bars on load
+    // Animate bars on load
     window.addEventListener('load', () => {
-      document.querySelectorAll('.conf-bar').forEach((bar, i) => {
-        bar.style.transition = `width 0.6s ease ${i * 0.1}s`;
+      document.querySelectorAll('.conf-bar, .hybrid-bar-fill').forEach((bar, i) => {
+        bar.style.transition = `width 0.65s cubic-bezier(0.4,0,0.2,1) ${i * 0.04}s`;
       });
     });
+
+    // Toggle show-all careers section
+    function toggleAllCareers() {
+      const list  = document.getElementById('allCareers');
+      const label = document.getElementById('showAllLabel');
+      const btn   = document.getElementById('showAllBtn');
+      const open  = list.classList.toggle('visible');
+      const total = {{ all_recs|length }};
+      label.textContent = open
+        ? 'Hide extra careers ↑'
+        : `Show all ${total} matched careers ↓`;
+      if (open) {
+        // Animate bars in newly revealed cards
+        list.querySelectorAll('.conf-bar, .hybrid-bar-fill').forEach((bar, i) => {
+          bar.style.transition = `width 0.6s cubic-bezier(0.4,0,0.2,1) ${i * 0.04}s`;
+        });
+      }
+    }
   </script>
 
 </body>
