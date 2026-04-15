@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Results — CareerMind</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
   <script src="/static/theme.js"></script>
   <style>
@@ -93,7 +93,7 @@
       <h3 class="explain-title">
         <span class="explain-icon">⚗</span>
         <strong>Hybrid Score Breakdown</strong>
-        <span style="font-size:.8rem;opacity:.6;font-weight:400;">— {{ result.top_career.career }}</span>
+        <span style="font-size:.875rem;opacity:.65;font-weight:400;">— {{ result.top_career.career }}</span>
       </h3>
 
       <div class="score-breakdown-card">
@@ -103,10 +103,10 @@
         </div>
         <div style="display:flex;align-items:baseline;gap:1.25rem;flex-wrap:wrap;">
           <div>
-            <div style="font-size:.73rem;opacity:.6;margin-bottom:.15rem;">Final Score</div>
+            <div style="font-size:.82rem;opacity:.7;margin-bottom:.15rem;">Final Score</div>
             <div class="final-score-badge">{{ '%g' % result.top_career.final_score }}</div>
           </div>
-          <div style="font-size:.8rem;opacity:.75;">
+          <div style="font-size:.875rem;opacity:.8;">
             = {{ result.alpha }} × <strong>{{ result.top_career.graph_score }}</strong>
             &nbsp;+&nbsp; {{ result.beta }} × <strong>{{ result.top_career.rule_score }}</strong>
           </div>
@@ -134,7 +134,7 @@
         </div>
         <span class="hybrid-bar-val">{{ result.top_career.rule_score }}</span>
       </div>
-      <div class="hybrid-bar-row" style="margin-top:.2rem;opacity:.65;font-size:.74rem;">
+      <div class="hybrid-bar-row" style="margin-top:.2rem;opacity:.7;font-size:.82rem;">
         <span class="hybrid-bar-label">&nbsp;↳ Classic</span>
         <div class="hybrid-bar-track">
           <div class="hybrid-bar-fill hybrid-bar-fill--classic"
@@ -142,7 +142,7 @@
         </div>
         <span class="hybrid-bar-val">{{ result.top_career.classic_score }}</span>
       </div>
-      <div class="hybrid-bar-row" style="opacity:.65;font-size:.74rem;">
+      <div class="hybrid-bar-row" style="opacity:.7;font-size:.82rem;">
         <span class="hybrid-bar-label">&nbsp;↳ Symbolic</span>
         <div class="hybrid-bar-track">
           <div class="hybrid-bar-fill hybrid-bar-fill--ns"
@@ -159,7 +159,7 @@
         <span class="explain-icon">🕸</span>
         <strong>Knowledge Graph Reasoning Paths</strong>
       </h3>
-      <p style="font-size:.82rem;opacity:.7;margin-bottom:.7rem;">
+      <p style="font-size:.9rem;opacity:.8;margin-bottom:.85rem;">
         Top traversal paths from your interests/skills to
         <em style="color:var(--accent);">{{ result.top_career.career }}</em>.
         Path score = product of edge weights.
@@ -182,7 +182,7 @@
         <span class="explain-icon">⚡</span>
         <strong>Triggered Symbolic Rules</strong>
       </h3>
-      <p style="font-size:.82rem;opacity:.7;margin-bottom:.7rem;">
+      <p style="font-size:.9rem;opacity:.8;margin-bottom:.85rem;">
         Explicit IF-THEN rules that fired for
         <em style="color:var(--accent);">{{ result.top_career.career }}</em>,
         blending boolean facts with numeric thresholds.
@@ -205,7 +205,7 @@
       <h3 class="explain-title">
         <span class="explain-icon">🔍</span>
         Why <em>{{ result.top_career.career }}</em>?
-        <span style="font-size:.74rem;opacity:.55;font-weight:400;margin-left:.4rem;">
+        <span style="font-size:.82rem;opacity:.65;font-weight:400;margin-left:.4rem;">
           ({{ result.top_career.rules_count }} rule{{ 's' if result.top_career.rules_count != 1 }}:
           {{ result.top_career.rules_fired | join(', ') }})
         </span>
@@ -326,7 +326,7 @@
               </summary>
 
               {% if rec.top_paths %}
-              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Graph Paths</p>
+              <p style="font-size:.8rem;font-weight:700;margin:.8rem 0 .3rem;opacity:.75;text-transform:uppercase;letter-spacing:.06em;">Graph Paths</p>
               <ul class="path-list">
                 {% for p in rec.top_paths %}
                 <li class="path-item">
@@ -338,7 +338,7 @@
               {% endif %}
 
               {% if rec.triggered_ns_rules %}
-              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Symbolic Rules</p>
+              <p style="font-size:.8rem;font-weight:700;margin:.8rem 0 .3rem;opacity:.75;text-transform:uppercase;letter-spacing:.06em;">Symbolic Rules</p>
               <ul class="ns-rule-list">
                 {% for r in rec.triggered_ns_rules %}
                 <li class="ns-rule-item">
@@ -351,7 +351,7 @@
               {% endif %}
 
               {% if rec.explanations %}
-              <p style="font-size:.74rem;font-weight:700;margin:.7rem 0 .25rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em;">Classic Rule Reasoning</p>
+              <p style="font-size:.8rem;font-weight:700;margin:.8rem 0 .3rem;opacity:.75;text-transform:uppercase;letter-spacing:.06em;">Classic Rule Reasoning</p>
               <ul class="mini-reason-list">
                 {% for point in rec.explanations %}
                 <li>{{ point }}</li>
